@@ -101,6 +101,9 @@ export function restoreAppearance(scene, settings) {
     shadow.shadow.camera.updateProjectionMatrix();
     scene.add(shadow,shadow.target);
   }
+  configureStudioShadows(scene);
+}
+export function configureStudioShadows(scene) {
   const shadowMaterials = new Set();
   scene.traverse(object => {
     if (!object.isMesh) return;

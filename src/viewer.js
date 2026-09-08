@@ -1,9 +1,9 @@
 import * as THREE from 'three';
-import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+import { TrainOrbitControls } from './train-controls.js';
 import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { RGBELoader } from 'three/addons/loaders/RGBELoader.js';
 import { MeshoptDecoder } from 'three/addons/libs/meshopt_decoder.module.js';
-import { blenderCamera, restoreAppearance, createPipeline } from './appearance.js';
+import { blenderCamera, restoreAppearance, createPipeline, configureStudioShadows } from './appearance.js';
 
 const ASSETS = new URL('../assets/', import.meta.url);
 const normalizeName = name => name.toLowerCase().replace(/[\s_.-]/g, '');
@@ -34,8 +34,11 @@ export class TrainViewer {
     this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     this.renderer.shadowMap.autoUpdate = false;
     container.append(this.renderer.domElement);
-    this.renderer.domElement.setAttribute('aria-label', '3D 列车场景，拖动旋转，滚轮缩放，右键平移');
-    this.controls = new OrbitControls(this.camera, this.renderer.domElement);
+    this.renderer.domElement.setAttribute('aria-label', '3D 列车场景，左键或单指旋转，中键或双指平移，滚轮或双指捏合缩放');
+    this.controls = new TrainOrbitControls(this.camera, this.renderer.domElement);
+    this.controls.orbitRoot = this.trainRoot;
+    this.controls.mouseButtons = { LEFT: THREE.MOUSE.ROTATE, MIDDLE: THREE.MOUSE.PAN, RIGHT: null };
+    this.controls.touches = { ONE: THREE.TOUCH.ROTATE, TWO: THREE.TOUCH.DOLLY_PAN };
     this.controls.enableDamping = true;
     this.controls.dampingFactor = 0.08;
     this.controls.minDistance = 0.3;
@@ -71,6 +74,7 @@ export class TrainViewer {
     this.environmentRoot.add(environment.scene);
     const train = await fetchGLB('default_train.glb');
     this.trainRoot.add(train.scene);
+    this.defaultTrain = train.scene;
     this.onStatus('正在生成 HDR 环境光和反射…');
     try {
       this.hdr = await new RGBELoader().setDataType(THREE.FloatType).loadAsync(new URL('environment.hdr', ASSETS).href, event => { if (event.total) this.onProgress(60 + event.loaded / event.total * 20); });
@@ -149,6 +153,47 @@ export class TrainViewer {
 
   resetView() { this.goToHero(); }
 
+  async uploadTrain(file) {
+    if (this.replacing || this.disposed) return;
+    this.replacing = true;
+    let candidate;
+    try {
+      if (!/\.glb$/i.test(file.name)) throw new Error('请选择 GLB 文件');
+      const bytes = await file.arrayBuffer();
+      validateGLB(bytes);
+      const loader = new GLTFLoader().setMeshoptDecoder(MeshoptDecoder);
+      const gltf = await loader.parseAsync(bytes, '');
+      candidate = gltf.scene;
+      if (this.disposed) throw new Error('预览已关闭');
+      const bounds = new THREE.Box3().setFromObject(candidate);
+      if (bounds.isEmpty() || ![...bounds.min, ...bounds.max].every(Number.isFinite)) throw new Error('GLB 中没有有效的模型');
+      // Uploaded files supply train geometry/materials, never scene lighting.
+      const lights = []; candidate.traverse(object => { if (object.isLight) lights.push(object); });
+      lights.forEach(light => light.removeFromParent());
+      configureStudioShadows(candidate);
+      await this.renderer.compileAsync(candidate, this.camera, this.scene);
+      if (this.disposed) throw new Error('预览已关闭');
+      this.replaceTrain(candidate);
+      candidate = null;
+    } finally {
+      if (candidate) disposeModel(candidate);
+      this.replacing = false;
+    }
+  }
+
+  replaceTrain(model) {
+    const previous = this.trainRoot.children[0];
+    if (previous === model) return;
+    this.trainRoot.clear();
+    this.trainRoot.add(model);
+    if (previous && previous !== this.defaultTrain) disposeModel(previous);
+    this.renderer.shadowMap.needsUpdate = true;
+  }
+
+  resetTrain() {
+    if (!this.replacing && !this.disposed) this.replaceTrain(this.defaultTrain);
+  }
+
   presetFov() {
     const fov = this.heroCamera?.isPerspectiveCamera ? this.heroCamera.fov : 40;
     const referenceAspect = this.heroCamera?.userData.referenceAspect || this.camera.aspect;
@@ -161,7 +206,11 @@ export class TrainViewer {
     this.camera.fov = view.fov;
     this.camera.updateProjectionMatrix();
     this.controls.target.copy(view.target);
+    // Presets intentionally restore the exact Blender transform, not an orbit.
+    const orbitRoot = this.controls.orbitRoot;
+    this.controls.orbitRoot = null;
     this.controls.update();
+    this.controls.orbitRoot = orbitRoot;
   }
 
   setBlackBackground(black) { this.scene.background = black || !this.hdr ? new THREE.Color(0x000000) : this.hdr; }
@@ -192,6 +241,7 @@ export class TrainViewer {
     this.renderer.setAnimationLoop(null);
     this.resizeObserver.disconnect();
     this.controls.dispose();
+    if (this.defaultTrain && !this.defaultTrain.parent) disposeModel(this.defaultTrain);
     const resources = new Set();
     this.scene.traverse(object => {
       if (object.isLight) object.shadow?.dispose();
@@ -209,4 +259,25 @@ export class TrainViewer {
     this.renderer.dispose();
     this.renderer.domElement.remove();
   }
+}
+
+export function validateGLB(bytes) {
+  const view = new DataView(bytes);
+  if (bytes.byteLength < 20 || view.getUint32(0, true) !== 0x46546c67 || view.getUint32(4, true) !== 2 || view.getUint32(8, true) !== bytes.byteLength) throw new Error('文件不是完整的 GLB 2.0 模型');
+  const length = view.getUint32(12, true);
+  if (view.getUint32(16, true) !== 0x4e4f534a || length > bytes.byteLength - 20) throw new Error('GLB 数据损坏');
+  const json = JSON.parse(new TextDecoder().decode(new Uint8Array(bytes, 20, length)));
+  if ([...(json.buffers || []), ...(json.images || [])].some(item => item.uri && !item.uri.startsWith('data:'))) throw new Error('请导出将贴图嵌入文件的 GLB');
+}
+
+export function disposeModel(root) {
+  const resources = new Set();
+  root.traverse(object => {
+    if (object.geometry) resources.add(object.geometry);
+    for (const material of object.material ? (Array.isArray(object.material) ? object.material : [object.material]) : []) {
+      resources.add(material);
+      for (const value of Object.values(material)) if (value?.isTexture) resources.add(value);
+    }
+  });
+  for (const resource of resources) { if (resource.isTexture) resource.source?.data?.close?.(); resource.dispose(); }
 }

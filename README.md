@@ -63,3 +63,12 @@ GitHub Pages 发布保留 `index.html`、`dist`、`assets`、`vendor` 的相对�
 6. `node tools/build.mjs`。
 
 离线脚本针对当前场景结构编写；输入换为其他场景时必须先检查根节点、材质和灯光图，不应直接套用节点规则。
+
+## 小版本更新（2026-09-09）
+页面标题为 CRRC-CAPTAIN；底部按钮从左到右为上传 GLB、恢复 Blender 默认相机、恢复默认列车，均使用 Ant Design 图标。
+上传在浏览器本地完成，GLB 必须嵌入贴图。保留导出坐标与米制尺寸；只替换 TrainRoot，环境与相机保持原设置。默认列车缓存用于立即恢复，替换掉的上传模型释放资源。
+assets/favicon.png 为透明 PNG，使用内置 imagegen 编辑原 LOGO_4.jpg 后缩小为 64px。
+图像编辑提示：Remove ONLY all white background, including white inner ring, to actual transparent alpha PNG. Preserve exact black six rounded spokes gear silhouette and central black circle, proportions and geometry. No redesign, no text, no shadows, no checkerboard baked in. Square favicon image with logo centered.
+
+2026-09-09 控件更新：使用 @material/web 2.5.0 的 filled tonal icon buttons，Camera 1 为 80×48 胶囊按钮，其他为 48×48；图标和数字统一为 24px。Tooltip 按 Material 3 plain tooltip 样式实现，文字为 Upload / Camera 1 / Default Trainset，支持悬浮、键盘聚焦和 Escape 关闭。Fullscreen loader 保留原设置。
+2026-09-09 按钮微调：Camera 改为 Google camera 图标，移除数字及专用数字字体；三个按钮统一 48px 圆形。背景 #14171c，图标 #f1f4f9，悬停/按下状态层透明度分别 14% / 24%。

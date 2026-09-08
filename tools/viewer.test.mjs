@@ -1,9 +1,58 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import * as THREE from 'three';
-import { TrainViewer } from '../src/viewer.js';
+import { TrainViewer, validateGLB } from '../src/viewer.js';
 import { blenderCamera } from '../src/appearance.js';
 import fs from 'node:fs';
+import { TrainOrbitControls } from '../src/train-controls.js';
+
+test('orbit stays centred on train origin after pan and throughout damping', () => {
+  const camera = new THREE.PerspectiveCamera(); camera.position.set(10, 7, 20);
+  const controls = new TrainOrbitControls(camera);
+  controls.target.set(5, 2, 3); controls.update();
+  const root = new THREE.Group(); root.position.set(1, 0, -2);
+  controls.orbitRoot = root;
+  const distance = camera.position.distanceTo(root.position);
+  const targetDistance = controls.target.distanceTo(root.position);
+  controls.enableDamping = true;
+  controls._rotateLeft(0.5); controls._rotateUp(0.2);
+  for (let i = 0; i < 200; i++) controls.update();
+  assert.ok(Math.abs(camera.position.distanceTo(root.position) - distance) < 1e-5);
+  assert.ok(Math.abs(controls.target.distanceTo(root.position) - targetDistance) < 1e-5);
+});
+
+test('replacement preserves environment and default resources, and disposes previous upload', () => {
+  const viewer = fixture();
+  viewer.trainRoot = new THREE.Group();
+  viewer.defaultTrain = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial());
+  viewer.trainRoot.add(viewer.defaultTrain);
+  viewer.renderer = { shadowMap: {} };
+  let disposed = false;
+  const uploaded = new THREE.Mesh(new THREE.BoxGeometry(), new THREE.MeshStandardMaterial());
+  uploaded.geometry.addEventListener('dispose', () => { disposed = true; });
+  viewer.replaceTrain(uploaded);
+  assert.equal(viewer.trainRoot.children[0], uploaded);
+  assert.equal(viewer.defaultTrain.parent, null);
+  viewer.resetTrain();
+  assert.equal(viewer.trainRoot.children[0], viewer.defaultTrain);
+  assert.equal(disposed, true);
+});
+
+test('invalid upload leaves original train attached and releases loading lock', async () => {
+  const viewer = fixture(); viewer.trainRoot = new THREE.Group();
+  const original = new THREE.Group(); viewer.trainRoot.add(original);
+  await assert.rejects(viewer.uploadTrain({ name: 'bad.glb', arrayBuffer: async () => new ArrayBuffer(4) }), /GLB/);
+  assert.equal(viewer.trainRoot.children[0], original);
+  assert.equal(viewer.replacing, false);
+});
+
+test('GLB validation rejects external textures', () => {
+  const json = new TextEncoder().encode(JSON.stringify({ asset: { version: '2.0' }, images: [{ uri: 'outside.png' }] }));
+  const bytes = new ArrayBuffer(20 + json.length), view = new DataView(bytes);
+  [0x46546c67, 2, bytes.byteLength, json.length, 0x4e4f534a].forEach((n, i) => view.setUint32(i * 4, n, true));
+  new Uint8Array(bytes, 20).set(json);
+  assert.throws(() => validateGLB(bytes), /贴图/);
+});
 
 function fixture() {
   const viewer = Object.create(TrainViewer.prototype);

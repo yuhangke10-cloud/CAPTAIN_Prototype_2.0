@@ -9,6 +9,8 @@
 		"test": "node --test tools/viewer.test.mjs"
 	},
 	"dependencies": {
+		"@ant-design/icons": "5.6.1",
+		"@material/web": "^2.5.0",
 		"antd": "5.27.3",
 		"meshoptimizer": "0.25.0",
 		"react": "19.1.1",
