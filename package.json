@@ -1,0 +1,24 @@
+{
+	"name": "rail-train-viewer",
+	"private": true,
+	"type": "module",
+	"scripts": {
+		"build": "node tools/build.mjs",
+		"start": "node tools/serve.mjs",
+		"prepare-assets": "node --max-old-space-size=8192 tools/prepare-assets.mjs && node tools/compress-assets.mjs",
+		"test": "node --test tools/viewer.test.mjs"
+	},
+	"dependencies": {
+		"antd": "5.27.3",
+		"meshoptimizer": "0.25.0",
+		"react": "19.1.1",
+		"react-dom": "19.1.1",
+		"three": "0.180.0"
+	},
+	"devDependencies": {
+		"@gltf-transform/core": "4.2.1",
+		"@gltf-transform/extensions": "4.2.1",
+		"@gltf-transform/functions": "4.2.1",
+		"esbuild": "0.25.9"
+	}
+}

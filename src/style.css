@@ -1,0 +1,7 @@
+html, body, #app { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #000; }
+* { box-sizing: border-box; }
+.viewer { position: fixed; inset: 0; }
+.viewer canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+.return-view.ant-btn { position: fixed; left: 50%; bottom: max(28px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 2; display: flex; align-items: center; gap: 9px; padding-inline: 25px; color: #e9edf0; background: #16191dcc; border-color: #ffffff30; box-shadow: 0 5px 25px #0005; backdrop-filter: blur(16px); }
+.ant-spin-fullscreen { background: #08090b !important; }
+.error { position: fixed; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #ddd; background: #08090b; font: 14px system-ui; padding: 24px; }

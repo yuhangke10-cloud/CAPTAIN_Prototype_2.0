@@ -1,0 +1,365 @@
+{
+  "camera": {
+    "name": "Camera01_hero",
+    "matrix": [
+      [
+        0.5735765695571899,
+        0.0571412593126297,
+        -0.8171567320823669,
+        -6.413782119750977
+      ],
+      [
+        -0.8191522359848022,
+        0.04001060500741005,
+        -0.5721793174743652,
+        -8.893428802490234
+      ],
+      [
+        -1.1306105562880475e-7,
+        0.9975641965866089,
+        0.06975651532411575,
+        2.662501573562622
+      ],
+      [
+        0,
+        0,
+        0,
+        1
+      ]
+    ],
+    "type": "PERSP",
+    "lens": 25,
+    "angle": 1.2480461597442627,
+    "sensor_width": 36,
+    "sensor_fit": "AUTO",
+    "shift_x": 0,
+    "shift_y": 0,
+    "orbitDistance": 39.23897171020508
+  },
+  "worldStrength": 0.05,
+  "worldRotation": 0.2617993950843811,
+  "view": {
+    "view_transform": "Filmic",
+    "look": "Medium High Contrast",
+    "exposure": 0,
+    "gamma": 1
+  },
+  "lights": [
+    {
+      "name": "Lighting",
+      "matrix": [
+        [
+          -56.87604904174805,
+          0,
+          0,
+          17.372421264648438
+        ],
+        [
+          0,
+          9.899999618530273,
+          0,
+          2.329123020172119
+        ],
+        [
+          0,
+          0,
+          9.899999618530273,
+          8.968830108642578
+        ],
+        [
+          0,
+          0,
+          0,
+          1
+        ]
+      ],
+      "type": "AREA",
+      "energy": 10,
+      "color": [
+        1,
+        1,
+        1
+      ],
+      "size": 1,
+      "shape": "ELLIPSE",
+      "normalize": true,
+      "exposure": 0,
+      "tree": {
+        "nodes": [
+          {
+            "name": "Emission",
+            "type": "EMISSION",
+            "label": "",
+            "inputs": [
+              {
+                "name": "Color",
+                "value": [
+                  1,
+                  1,
+                  1,
+                  1
+                ],
+                "linked": true
+              },
+              {
+                "name": "Strength",
+                "value": 900,
+                "linked": false
+              },
+              {
+                "name": "Weight",
+                "value": 0,
+                "linked": false
+              }
+            ],
+            "outputs": [
+              {
+                "name": "Emission",
+                "value": null
+              }
+            ]
+          },
+          {
+            "name": "Light Output",
+            "type": "OUTPUT_LIGHT",
+            "label": "",
+            "inputs": [
+              {
+                "name": "Surface",
+                "value": null,
+                "linked": true
+              }
+            ],
+            "outputs": []
+          },
+          {
+            "name": "Separate XYZ",
+            "type": "SEPXYZ",
+            "label": "",
+            "inputs": [
+              {
+                "name": "Vector",
+                "value": [
+                  0,
+                  0,
+                  0
+                ],
+                "linked": true
+              }
+            ],
+            "outputs": [
+              {
+                "name": "X",
+                "value": 0
+              },
+              {
+                "name": "Y",
+                "value": 0
+              },
+              {
+                "name": "Z",
+                "value": 0
+              }
+            ]
+          },
+          {
+            "name": "Mapping",
+            "type": "MAPPING",
+            "label": "",
+            "inputs": [
+              {
+                "name": "Vector",
+                "value": [
+                  0,
+                  0,
+                  0
+                ],
+                "linked": true
+              },
+              {
+                "name": "Location",
+                "value": [
+                  0,
+                  0,
+                  0
+                ],
+                "linked": false
+              },
+              {
+                "name": "Rotation",
+                "value": [
+                  0,
+                  0,
+                  0
+                ],
+                "linked": false
+              },
+              {
+                "name": "Scale",
+                "value": [
+                  1,
+                  1,
+                  1
+                ],
+                "linked": false
+              }
+            ],
+            "outputs": [
+              {
+                "name": "Vector",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Texture Coordinate",
+            "type": "TEX_COORD",
+            "label": "",
+            "inputs": [],
+            "outputs": [
+              {
+                "name": "Generated",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "name": "Normal",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "name": "UV",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "name": "Object",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "name": "Camera",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "name": "Window",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              },
+              {
+                "name": "Reflection",
+                "value": [
+                  0,
+                  0,
+                  0
+                ]
+              }
+            ]
+          },
+          {
+            "name": "Color Ramp",
+            "type": "VALTORGB",
+            "label": "",
+            "inputs": [
+              {
+                "name": "Factor",
+                "value": 0.5,
+                "linked": true
+              }
+            ],
+            "outputs": [
+              {
+                "name": "Color",
+                "value": [
+                  0.800000011920929,
+                  0.800000011920929,
+                  0.800000011920929,
+                  1
+                ]
+              },
+              {
+                "name": "Alpha",
+                "value": 0
+              }
+            ],
+            "ramp": [
+              {
+                "position": 0,
+                "color": [
+                  0,
+                  0,
+                  0,
+                  1
+                ]
+              },
+              {
+                "position": 1,
+                "color": [
+                  1,
+                  1,
+                  1,
+                  1
+                ]
+              }
+            ]
+          }
+        ],
+        "links": [
+          {
+            "from": "Emission",
+            "output": "Emission",
+            "to": "Light Output",
+            "input": "Surface"
+          },
+          {
+            "from": "Texture Coordinate",
+            "output": "UV",
+            "to": "Mapping",
+            "input": "Vector"
+          },
+          {
+            "from": "Mapping",
+            "output": "Vector",
+            "to": "Separate XYZ",
+            "input": "Vector"
+          },
+          {
+            "from": "Color Ramp",
+            "output": "Color",
+            "to": "Emission",
+            "input": "Color"
+          },
+          {
+            "from": "Separate XYZ",
+            "output": "Y",
+            "to": "Color Ramp",
+            "input": "Factor"
+          }
+        ]
+      }
+    }
+  ]
+}
