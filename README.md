@@ -1,4 +1,4 @@
-# CAPTAIN — v1.0.0 Beta
+# CAPTAIN — v1.0.1 Beta
 
 本文件夹是可直接发布的静态网站。将整个文件夹内容放在 GitHub 仓库的发布分支根目录，在仓库 **Settings → Pages → Build and deployment** 中选择 **Deploy from a branch**、对应分支及 **/(root)**。`index.html`、`dist/`、`assets/`、`vendor/` 与 `.nojekyll` 必须保持当前相对位置。
 
